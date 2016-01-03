@@ -1,0 +1,89 @@
+ConnectionLimit:
+  PerIP: 200
+  In: 60
+MainLog: logs/main.log
+Servers:
+  #plain:
+  #  Address: 127.0.0.1
+  #  Port: 80
+  #  Directory: C:\Users\Py64\Documents\cros\cros\public
+
+  ssl:
+    Address: 127.0.0.1
+    Port: 443
+
+    ##
+    # Files
+    ##
+    Directory: C:\Users\Py64\Documents\cros\cros\public
+    IndexFiles:
+      - index.html
+    Listing: False
+
+    ##
+    # Error Pages
+    ##
+    Errors:
+      404: errors/404.html
+      403: errors/403.html
+      500: errors/500.html
+
+    ##
+    # SPDY
+    ##
+    SPDY:
+      Enable: True
+      Protocols:
+        - h2
+        - spdy/3.1
+        - http/1.1
+
+    ##
+    # SSL & Let's Encrypt
+    ##
+    SSL:
+      Enable: True
+      PrivateKey: 5067521-127.0.0.1.key
+      Certificate: 5067521-127.0.0.1.cert
+      #CA: ca.pem
+      Ciphers: ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:ECDHE-RSA-RC4-SHA
+      LetsEncrypt:
+        Enable: True
+        Server: https://acme-v01.api.letsencrypt.org/directory
+
+    ##
+    # Logging
+    ##
+    Logging:
+      Enable: True
+      Access: logs/access.log
+      Error: logs/error.log
+      Warn: logs/warn.log
+      Info: logs/info.log
+      Unknown: logs/unknown.log
+
+    ##
+    # GZip
+    ##
+    Gzip: True
+
+    ##
+    # Access
+    ##
+    Access:
+      Enable: False
+      blockedExtensions:
+        - .ext
+      blockedPaths:
+        - /path
+
+    ##
+    # Additional Headers
+    ##
+    Headers:
+      Strict-Transport-Security: max-age=63072000; preload; includeSubDomains
+      X-Frame-Options: SAMEORIGIN
+      X-Content-Type-Options: nosniff
+      X-XSS-Protection: 1; mode=block
+      X-Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://ssl.google-analytics.com https://connect.facebook.net; img-src 'self' https://ssl.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://themes.googleusercontent.com; frame-src https://www.facebook.com; object-src 'none'
+    X-Powered-By: False
