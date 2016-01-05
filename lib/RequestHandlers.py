@@ -14,7 +14,7 @@ from urllib.parse import unquote
 from lib import HTTPHeaders, Out, Gzip
 import mimetypes
 
-class HTTPRequestHandler(http.server.BaseHTTPRequestHandler):
+class HTTP(http.server.BaseHTTPRequestHandler):
     ServerConfiguration = None
     AlternativeErrorDocs = {'404': """<!DOCTYPE html>
     <head>
