@@ -63,6 +63,14 @@ Servers:
       Unknown: logs/unknown.log
 
     ##
+    # CGI
+    ##
+    CGI:
+      Enable: True
+      Directories:
+        - /cgi-bin
+
+    ##
     # GZip
     ##
     Gzip: True

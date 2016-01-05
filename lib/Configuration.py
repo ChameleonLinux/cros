@@ -26,7 +26,7 @@ class Configuration:
 
 class Server:
     # Init predefined variables
-    Address = Port = Directory = Listing = IndexFiles = Errors = SPDY = SSL = Logging = Gzip = Access = Headers = XPoweredBy = None
+    Address = Port = Directory = Listing = IndexFiles = Errors = SPDY = SSL = Logging = Gzip = Access = Headers = CGI = XPoweredBy = None
 
     # Load
     def __init__(self, srvyaml):
@@ -62,6 +62,10 @@ class Server:
             'Info': '/var/log/httpjs/info.log',
             'Warn': '/var/log/httpjs/warn.log',
             'Unknown': '/var/log/httpjs/unknown.log'
+        })
+        self.CGI = inud.get_d(srvyaml, 'CGI', {
+            'Enable': False,
+            'Directories': ['/cgi-bin']
         })
         self.Gzip = inud.get_d(srvyaml, 'Gzip', True)
         self.Access = inud.get_d(srvyaml, 'Access', {

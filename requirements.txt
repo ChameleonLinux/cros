@@ -1,7 +1,4 @@
 cros
 
-# SPDY
-python-spdylay==0.1.2
-
 # RunFile
 pyyaml==3.11
