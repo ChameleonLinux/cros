@@ -1,13 +1,9 @@
 MainLog: logs/main.log
-Extensions:
-  - exts/helloworldheader
 Servers:
   plain:
     Address: 127.0.0.1
     Port: 80
     Directory: C:\Users\Py64\Documents\cros\cros\public
-    Includes:
-      - logs.conf
 
   ssl:
     Address: 127.0.0.1
