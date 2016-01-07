@@ -10,7 +10,7 @@ from lib import IfNoneUseDefault as inud
 
 class Configuration:
     # Init predefined variables
-    RunAs = ConnectionLimit = MainLog = None
+    RunAs = MainLog = None
     Servers = []
 
     # Load
@@ -18,7 +18,6 @@ class Configuration:
         file = open(path)
         runfile = yaml.load(file.read())
         self.RunAs = inud.get_d(runfile, 'RunAs', 'http')
-        self.ConnectionLimit = inud.get_d(runfile, 'ConnectionLimit', {'PerIP': 200, 'In': 60})
         self.MainLog = inud.get_d(runfile, "MainLog", "/var/log/httpjs/main.log")
 
         # Put servers configurations into array
@@ -26,19 +25,19 @@ class Configuration:
 
 class Server:
     # Init predefined variables
-    Address = Port = Directory = Listing = IndexFiles = Errors = SPDY = SSL = Logging = Gzip = Access = Headers = CGI = XPoweredBy = None
+    Address = Port = Directory = Listing = IndexFiles = Errors = SPDY = SSL = Logging = Gzip = Access = Headers = CGI = XPoweredBy = Authentication = BannedIPs = None
 
     # Load
-    def __init__(self, srvyaml):
+    def load(self, srvyaml):
         self.Address = inud.get_d(srvyaml, 'Address', None)
         self.Port = int(inud.get_d(srvyaml, 'Port', None))
         self.Directory = inud.get_d(srvyaml, 'Directory', None)
         self.Listing = inud.get_d(srvyaml, 'Listing', False)
         self.IndexFiles = inud.get_d(srvyaml, 'IndexFiles', ["index.html"])
         self.Errors = inud.get_d(srvyaml, "Errors", {
-            '404': '/usr/share/httpjs/errors/404.html',
-            '403': '/usr/share/httpjs/errors/403.html',
-            '500': '/usr/share/httpjs/errors/500.html'
+            'e404': '/usr/share/httpjs/errors/404.html',
+            'e403': '/usr/share/httpjs/errors/403.html',
+            'e500': '/usr/share/httpjs/errors/500.html'
         })
         self.SPDY = inud.get_d(srvyaml, 'SPDY', {
             'Enable': None,
@@ -55,6 +54,9 @@ class Server:
                 'Server': 'https://acme-v01.api.letsencrypt.org/directory'
             }
         })
+        if self.SPDY['Enable'] == None:
+            if self.SSL['Enable'] == True: self.SPDY['Enable'] = True
+            else: self.SPDY['Enable'] = False
         self.Logging = inud.get_d(srvyaml, 'Logging', {
             'Enable': True,
             'Access': '/var/log/httpjs/access.log',
@@ -73,5 +75,13 @@ class Server:
             'blockedExtensions': [],
             'blockedPaths': []
         })
+        self.BannedIPs = inud.get_d(srvyaml, 'BannedIPs', [])
+        self.Authentication = inud.get_d(srvyaml, 'Authentication', [])
         self.Headers = inud.get_d(srvyaml, 'Headers', {})
         self.XPoweredBy = inud.get_d(srvyaml, 'XPoweredBy', False)
+
+    def __init__(self, srvyaml):
+        dict_ = srvyaml
+        for f in inud.get_d(srvyaml, 'Includes', []):
+            dict_.update(yaml.load(open(f,"r").read()))
+        self.load(dict_)

@@ -56,9 +56,9 @@ Servers:
     # Error pages
     ##
     Errors:
-      404: /usr/share/httpjs/errors/404.html
-      403: /usr/share/httpjs/errors/403.html
-      500: /usr/share/httpjs/errors/500.html
+      e404: /usr/share/httpjs/errors/404.html
+      e403: /usr/share/httpjs/errors/403.html
+      e500: /usr/share/httpjs/errors/500.html
 
     ##
     # Logging

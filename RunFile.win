@@ -1,12 +1,13 @@
-ConnectionLimit:
-  PerIP: 200
-  In: 60
 MainLog: logs/main.log
+Extensions:
+  - exts/helloworldheader
 Servers:
-  #plain:
-  #  Address: 127.0.0.1
-  #  Port: 80
-  #  Directory: C:\Users\Py64\Documents\cros\cros\public
+  plain:
+    Address: 127.0.0.1
+    Port: 80
+    Directory: C:\Users\Py64\Documents\cros\cros\public
+    Includes:
+      - logs.conf
 
   ssl:
     Address: 127.0.0.1
@@ -24,15 +25,15 @@ Servers:
     # Error Pages
     ##
     Errors:
-      404: errors/404.html
-      403: errors/403.html
-      500: errors/500.html
+      e404: errors/404.html
+      e403: errors/403.html
+      e500: errors/500.html
 
     ##
     # SPDY
     ##
     SPDY:
-      Enable: True
+      Enable: False
       Protocols:
         - h2
         - spdy/3.1
@@ -84,6 +85,17 @@ Servers:
         - .ext
       blockedPaths:
         - /path
+
+    ##
+    # Banned IPs
+    ##
+    BannedIPs:
+      - 0.0.0.0
+
+    Authentication:
+      - path: /veerysecret.pdf
+        passwd: 09cc876196d13a42022a6c2005305305
+        reason: I will do not give you access to this PDF! Why I would to?!
 
     ##
     # Additional Headers
