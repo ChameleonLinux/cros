@@ -10,14 +10,13 @@ from lib import IfNoneUseDefault as inud
 
 class Configuration:
     # Init predefined variables
-    RunAs = MainLog = None
+    MainLog = None
     Servers = []
 
     # Load
     def __init__(self, path):
         file = open(path)
         runfile = yaml.load(file.read())
-        self.RunAs = inud.get_d(runfile, 'RunAs', 'http')
         self.MainLog = inud.get_d(runfile, "MainLog", "/var/log/httpjs/main.log")
 
         # Put servers configurations into array
@@ -25,7 +24,7 @@ class Configuration:
 
 class Server:
     # Init predefined variables
-    Address = Port = Directory = Listing = IndexFiles = Errors = SPDY = SSL = Logging = Gzip = Access = Headers = CGI = XPoweredBy = Authentication = BannedIPs = None
+    Address = Port = Directory = Listing = IndexFiles = Errors = SPDY = SSL = Logging = Gzip = Access = Headers = CGI = ServerHeader = None
 
     # Load
     def load(self, srvyaml):
@@ -73,12 +72,12 @@ class Server:
         self.Access = inud.get_d(srvyaml, 'Access', {
             'Enable': False,
             'blockedExtensions': [],
-            'blockedPaths': []
+            'blockedPaths': [],
+            'bannedIPs': [],
+            'Authentication': []
         })
-        self.BannedIPs = inud.get_d(srvyaml, 'BannedIPs', [])
-        self.Authentication = inud.get_d(srvyaml, 'Authentication', [])
         self.Headers = inud.get_d(srvyaml, 'Headers', {})
-        self.XPoweredBy = inud.get_d(srvyaml, 'XPoweredBy', False)
+        self.ServerHeader = inud.get_d(srvyaml, 'Server-Header', False)
 
     def __init__(self, srvyaml):
         dict_ = srvyaml

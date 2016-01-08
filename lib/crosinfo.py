@@ -5,10 +5,12 @@
   it's implemented.
 """
 
-DetailedVersion = "2a"
+DetailedVersion = "3a"
+Insecure = True
 Final = False
 FinalVersion = "1.0"
 # build date may be different than commit date
-BuildDate = "Thu Jan  7 21:54:03    2016"
+BuildDate = "Sat Jan  9 01:01:48 CET 2016"
+
 if Final: Version = FinalVersion
-else: Version = DetailedVersion + "   (" + BuildDate + ")"
+else: Version = DetailedVersion + "   (" + BuildDate + ")\nInsecure: " + str(Insecure)

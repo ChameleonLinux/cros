@@ -12,4 +12,9 @@ def get_d(dict_, key, default):
             if dict_[key].lower() == "True": return True
             if dict_[key].lower() == "False": return False
         return dict_[key]
+    if key.lower() in dict_:
+        if isinstance(dict_[key.lower()], str):
+            if dict_[key.lower()].lower() == "True": return True
+            if dict_[key.lower()].lower() == "False": return False
+        return dict_[key.lower()]
     return default

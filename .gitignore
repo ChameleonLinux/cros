@@ -2,7 +2,8 @@ magic
 magic1.dll
 regex2.dll
 zlib1.dll
-logs
+logs/*
 lib/__pycache__
 *.cert
 *.key
+dev.RunFile

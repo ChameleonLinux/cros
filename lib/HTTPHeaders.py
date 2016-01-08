@@ -11,7 +11,6 @@ def send(handself, path, extra={}):
         else: mimem = magic.Magic(mime=True)
         handself.send_header("Content-Type", bytes.decode(mimem.from_file(path)))
     for header, value in handself.ServerConfiguration.Headers.items(): handself.send_header(header, value)
-    if handself.ServerConfiguration.XPoweredBy == True: handself.send_header("X-Powered-By", "cros/" + crosinfo.Version)
     if handself.ServerConfiguration.Gzip == True: handself.send_header("Content-Encoding", "gzip")
     for key, value in extra.items(): handself.send_header(key, value)
-    handself.end_headers()
+    if getattr(handself, "end_headers", None): handself.end_headers()

@@ -3,7 +3,7 @@ Servers:
   plain:
     Address: 127.0.0.1
     Port: 80
-    Directory: C:\Users\Py64\Documents\cros\cros\public
+    Directory: C:\cros\public
 
   ssl:
     Address: 127.0.0.1
@@ -12,7 +12,7 @@ Servers:
     ##
     # Files
     ##
-    Directory: C:\Users\Py64\Documents\cros\cros\public
+    Directory: C:\cros\public
     IndexFiles:
       - index.html
     Listing: False
@@ -21,19 +21,9 @@ Servers:
     # Error Pages
     ##
     Errors:
-      e404: errors/404.html
-      e403: errors/403.html
-      e500: errors/500.html
-
-    ##
-    # SPDY
-    ##
-    SPDY:
-      Enable: False
-      Protocols:
-        - h2
-        - spdy/3.1
-        - http/1.1
+      e404: C:\cros\errors/404.html
+      e403: C:\cros\errors/403.html
+      e500: C:\cros\errors/500.html
 
     ##
     # SSL & Let's Encrypt
@@ -53,11 +43,11 @@ Servers:
     ##
     Logging:
       Enable: True
-      Access: logs/access.log
-      Error: logs/error.log
-      Warn: logs/warn.log
-      Info: logs/info.log
-      Unknown: logs/unknown.log
+      Access: C:\cros\logs/access.log
+      Error: C:\cros\logs/error.log
+      Warn: C:\cros\logs/warn.log
+      Info: C:\cros\logs/info.log
+      Unknown: C:\cros\logs/unknown.log
 
     ##
     # CGI
@@ -78,20 +68,24 @@ Servers:
     Access:
       Enable: False
       blockedExtensions:
-        - .ext
+        - .blockedext
       blockedPaths:
-        - /path
+        - undefined
+      bannedIPs:
+        - 0.0.0.0
+      Authentication:
+        - path: undefined
 
     ##
-    # Banned IPs
+    # Rewrite & redirect
     ##
-    BannedIPs:
-      - 0.0.0.0
-
-    Authentication:
-      - path: /veerysecret.pdf
-        passwd: 09cc876196d13a42022a6c2005305305
-        reason: I will do not give you access to this PDF! Why I would to?!
+    Rewrite:
+      - path: /cros.git
+        type: redirect
+        destination: https://github.com/ProjectCros/cros
+      - type: rewrite
+        pattern: ^/test/(.*)$
+        destination: /index.html?p=$1
 
     ##
     # Additional Headers
@@ -102,4 +96,4 @@ Servers:
       X-Content-Type-Options: nosniff
       X-XSS-Protection: 1; mode=block
       X-Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://ssl.google-analytics.com https://connect.facebook.net; img-src 'self' https://ssl.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://themes.googleusercontent.com; frame-src https://www.facebook.com; object-src 'none'
-    X-Powered-By: False
+    Server-Header: False

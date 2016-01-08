@@ -8,7 +8,7 @@
 import re
 import sys
 
-def getArgument(namesre, isshort=False):
+def get(namesre, isshort=False):
     i = 0
     # For each argument
     for arg in sys.argv:

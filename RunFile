@@ -1,8 +1,4 @@
-RunAs: http
-ConnectionLimit:
-  PerIP: 200
-  In: 60
-MainLog: /var/log/httpjs/main.log
+MainLog: logs/main.log
 Servers:
   plain:
     Address: 127.0.0.1
@@ -25,9 +21,9 @@ Servers:
     # Error Pages
     ##
     Errors:
-      404: /usr/share/httpjs/errors/404.html
-      403: /usr/share/httpjs/errors/403.html
-      500: /usr/share/httpjs/errors/500.html
+      e404: /usr/share/cros/404.html
+      e403: /usr/share/cros/403.html
+      e500: /usr/share/cros/500.html
 
     ##
     # SPDY
@@ -43,48 +39,63 @@ Servers:
     # SSL & Let's Encrypt
     ##
     SSL:
-      Enable: False
-      PrivateKey: private.key
-      Certificate: ssl.crt
-      CA: ca.pem
+      Enable: True
+      PrivateKey: 5067521-127.0.0.1.key
+      Certificate: 5067521-127.0.0.1.cert
+      #CA: ca.pem
       Ciphers: ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:ECDHE-RSA-RC4-SHA
       LetsEncrypt:
         Enable: True
         Server: https://acme-v01.api.letsencrypt.org/directory
 
     ##
-    # Error pages
-    ##
-    Errors:
-      e404: /usr/share/httpjs/errors/404.html
-      e403: /usr/share/httpjs/errors/403.html
-      e500: /usr/share/httpjs/errors/500.html
-
-    ##
     # Logging
     ##
     Logging:
       Enable: True
-      Access: /var/log/httpjs/access.log
-      Error: /var/log/httpjs/error.log
-      Warn: /var/log/httpjs/warn.log
-      Info: /var/log/httpjs/info.log
-      Unknown: logs/unknown.log
+      Access: /var/log/cros/access.log
+      Error: /var/log/cros/error.log
+      Warn: /var/log/cros/warn.log
+      Info: /var/log/cros/info.log
+      Unknown: /var/log/cros/unknown.log
+
+    ##
+    # CGI
+    ##
+    CGI:
+      Enable: True
+      Directories:
+        - /cgi-bin
 
     ##
     # GZip
     ##
-    gzip: True
+    Gzip: True
 
     ##
     # Access
     ##
-    access:
+    Access:
       Enable: False
       blockedExtensions:
-        - .ext
+        - .blockedext
       blockedPaths:
-        - /path
+        - undefined
+      bannedIPs:
+        - 0.0.0.0
+      Authentication:
+        - path: undefined
+
+    ##
+    # Rewrite & redirect
+    ##
+    Rewrite:
+      - path: /cros.git
+        type: redirect
+        destination: https://github.com/ProjectCros/cros
+      - type: rewrite
+        pattern: ^/test/(.*)$
+        destination: /index.html?p=$1
 
     ##
     # Additional Headers
@@ -95,4 +106,4 @@ Servers:
       X-Content-Type-Options: nosniff
       X-XSS-Protection: 1; mode=block
       X-Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://ssl.google-analytics.com https://connect.facebook.net; img-src 'self' https://ssl.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://themes.googleusercontent.com; frame-src https://www.facebook.com; object-src 'none'
-    X-Powered-By: False
+    Server-Header: False
