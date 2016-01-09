@@ -10,7 +10,16 @@ import spdylay
 import ssl
 import threading
 
-class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+class ServerStart:
+    server_thread = None
+    def start(self, daemon=False):
+        self.server_thread = threading.Thread(target=self.serve_forever)
+        self.server_thread.daemon = daemon
+        self.server_thread.start()
+    def stop(self):
+        if type(self.server_thread) != None: self.server_thread.stop()
+
+class ThreadedTCPServer(ServerStart, socketserver.ThreadingMixIn, socketserver.TCPServer):
 
     """
       This server provides variable for server configuration object. Nothing more.
@@ -26,7 +35,7 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
         """Finish one request by instantiating RequestHandlerClass."""
         self.RequestHandlerClass(request, client_address, self.ServerConfiguration, self)
 
-class ThreadedSPDYServer(spdylay.ThreadedSPDYServer):
+class ThreadedSPDYServer(ServerStart, spdylay.ThreadedSPDYServer):
 
     ServerConfiguration = None
 
@@ -34,11 +43,6 @@ class ThreadedSPDYServer(spdylay.ThreadedSPDYServer):
                  cert_file, key_file):
         self.ServerConfiguration = srvconf
         spdylay.ThreadedSPDYServer.__init__(self, server_address, RequestHandlerCalss, cert_file, key_file)
-
-    def start(self, daemon=False):
-        server_thread = threading.Thread(target=self.serve_forever)
-        server_thread.daemon = daemon
-        server_thread.start()
 
     def process_request(self, request, client_address):
         # ThreadingMixIn.process_request() dispatches request and
