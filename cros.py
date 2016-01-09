@@ -8,21 +8,22 @@
 """
 import sys
 if sys.version_info <= (3,0):
-    print("cros has been written only for Python 3 and tested on Python 3.5.1.")
+    print("[err] cros has been written only for Python 3 and tested on Python 3.5.1.")
     sys.exit(4)
 import re, os
 try:
-    from lib import IfNoneUseDefault as inud
-    from lib import Configuration, Arguments, Out, crosinfo, Gzip, RequestHandlers, Servers, SSL
-except Exception:
-    print("Corrupted cros installation!")
-    sys.exit(400)
-import threading
-try:
     import spdylay
 except Exception:
-    print("Could not load spdylay: SPDY may be not available.")
-    if Arguments.get(re.compile("--warning-is-error|--always-crash|--exit-on-warn")): sys.exit(340)
+    print("[err] Could not load spdylay.")
+    sys.exit(130)
+try:
+    from lib import IfNoneUseDefault as inud
+    from lib import Configuration, Arguments, Out, crosinfo, Gzip, RequestHandlers, Servers, SSL
+except Exception as e:
+    print("[err] Corrupted cros installation!")
+    print(e)
+    sys.exit(400)
+import threading
 
 # Load configuration
 configpath = inud.get(Arguments.get(re.compile("--config|-c")), "RunFile", True)

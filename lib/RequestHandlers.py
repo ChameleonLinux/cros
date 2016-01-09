@@ -7,7 +7,6 @@
 """
 import http.server
 from lib import BasicMixIn, HTTPHeaders
-import spdylay
 
 class HTTP(BasicMixIn.MixIn, http.server.BaseHTTPRequestHandler):
     ServerConfiguration = None
