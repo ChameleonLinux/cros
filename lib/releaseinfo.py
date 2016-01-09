@@ -5,9 +5,9 @@
   it's implemented.
 """
 
-DetailedVersion = "4b"
+DetailedVersion = "4c"
 Insecure = False
 Final = False
 FinalVersion = "1.0"
 # build date may be different than commit date
-BuildDate = "Sat Jan  9 14:52:12 CET 2016"
+BuildDate = "Sat Jan  9 15:03:37     2016"
