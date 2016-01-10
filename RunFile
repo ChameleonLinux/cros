@@ -86,6 +86,8 @@ Servers:
       Authentication:
         - path: undefined
 
+    Proxy: https://google.com
+
     ##
     # Rewrite & redirect
     ##

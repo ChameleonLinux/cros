@@ -6,6 +6,7 @@
  * This software is distributed on CPL license.
  * https://github.com/ProjectCros/CPL
 """
+
 import sys
 if sys.version_info <= (3,0):
     print("[err] cros has been written only for Python 3 and tested on Python 3.5.1.")
@@ -18,7 +19,7 @@ except Exception:
     sys.exit(130)
 try:
     from lib import IfNoneUseDefault as inud
-    from lib import Configuration, Arguments, Out, crosinfo, Gzip, RequestHandlers, Servers, SSL
+    from lib import Configuration, Arguments, Out, Gzip, RequestHandlers, Servers, SSL, crosinfo
 except Exception as e:
     print("[err] Corrupted cros installation!")
     print(e)

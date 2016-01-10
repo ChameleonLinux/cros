@@ -3,7 +3,7 @@ import socketserver
 import os
 import urllib
 from urllib.parse import unquote
-from lib import HTTPHeaders, Out, Gzip, Passwd
+from lib import HTTPHeaders, Out, Gzip, Passwd, crosinfo, Proxy
 import base64
 import cgi
 import spdylay
@@ -31,7 +31,7 @@ class MixIn:
     </body>
     </html>"""}
 
-    server_version = "cros/3a"
+    server_version = "cros/" + crosinfo.Version
 
     def Log(self, key, msg, show=False, exit=False):
         path=""
@@ -47,13 +47,21 @@ class MixIn:
 
     def do_GET(self):
         """Serve a GET request."""
+        Out.log("__DEBUG__", "processing request")
         if self.Banned(): return None
         path = self.translate_path(self.path)
         f = self.Authorize(path)
         if self.checkAccess(path) == None or f == None or self.Authenticate() == False: return None
-        self.send_response(200)
-        HTTPHeaders.send(self, path)
-        self.Send(f.read())
+        proxy = self.Proxy()
+        Out.log("__DEBUG__", proxy)
+        if proxy == None:
+            self.send_response(200)
+            HTTPHeaders.send(self, path)
+            self.Send(f.read())
+        else:
+            self.send_response(200)
+            HTTPHeaders.send(self, 'skip')
+            self.Send(proxy)
 
     def checkAccess(self, path, honly=False):
         accessnode = self.ServerConfiguration.Access
@@ -70,6 +78,7 @@ class MixIn:
     def Send(self, data):
         enc = inud.get_d(self.headers, 'Accept-Encoding', '')
         dataa = data
+        Out.log("__DEBUG__", dataa)
         if self.ServerConfiguration.Gzip and 'gzip' in enc.lower(): dataa = Gzip.encode(data)
         self.wfile.write(dataa)
 
@@ -154,6 +163,13 @@ class MixIn:
         if code==403: msg="403 Forbidden"
         if code==500: msg="500 Internal Server Error"
         self.send_error(code, message=msg)
+
+    def Proxy(self):
+        if self.ServerConfiguration.Proxy != None:
+            headers = {"X-Forwarded-By": self.version_string(), "Accept-Encoding": "gzip"}
+            remoteresponse = Proxy.Get(self.ServerConfiguration.Proxy + self.path, self.client_address, headers, dict(self.headers))
+            return remoteresponse
+        return None
 
     def do_AUTHHEAD(self, arr):
         path = self.translate_path(self.path)

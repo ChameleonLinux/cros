@@ -24,7 +24,7 @@ class Configuration:
 
 class Server:
     # Init predefined variables
-    Address = Port = Directory = Listing = IndexFiles = Errors = SPDY = SSL = Logging = Gzip = Access = Headers = CGI = ServerHeader = None
+    Address = Port = Directory = Listing = IndexFiles = Errors = SPDY = SSL = Logging = Gzip = Access = Headers = CGI = ServerHeader = Proxy = None
 
     # Load
     def load(self, srvyaml):
@@ -33,6 +33,7 @@ class Server:
         self.Directory = inud.get_d(srvyaml, 'Directory', None)
         self.Listing = inud.get_d(srvyaml, 'Listing', False)
         self.IndexFiles = inud.get_d(srvyaml, 'IndexFiles', ["index.html"])
+        self.Proxy = inud.get_d(srvyaml, 'Proxy', None)
         self.Errors = inud.get_d(srvyaml, "Errors", {
             'e404': '/usr/share/httpjs/errors/404.html',
             'e403': '/usr/share/httpjs/errors/403.html',
