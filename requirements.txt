@@ -2,3 +2,9 @@ cros
 
 # RunFile
 pyyaml==3.11
+
+# SPDY
+python-spdylay==0.1.2
+
+# MIME types
+python-magic==0.4.10
