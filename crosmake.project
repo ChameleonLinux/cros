@@ -1,0 +1,31 @@
+Sources = SourceList([
+			("lib/__init__.py", "lib/__init__.pyc"),
+			("lib/Arguments.py", "lib/Arguments.pyc"),
+			("lib/crosinfo.py", "lib/crosinfo.pyc"),
+			("lib/releaseinfo.py", "lib/releaseinfo.pyc"),
+			("lib/Gzip.py", "lib/Gzip.pyc"),
+			("lib/Configuration.py", "lib/Configuration.pyc"),
+			("lib/BasicMixIn.py", "lib/BasicMixIn.pyc"),
+			("lib/HTTPHeaders.py", "lib/HTTPHeaders.pyc"),
+			("lib/IfNoneUseDefault.py", "lib/IfNoneUseDefault.pyc"),
+			("lib/Out.py", "lib/Out.pyc"),
+			("lib/Passwd.py", "lib/Passwd.pyc"),
+			("lib/SSL.py", "lib/SSL.pyc"),
+			("lib/Proxy.py", "lib/Proxy.pyc"),
+			("lib/RequestHandlers.py", "lib/RequestHandlers.pyc"),
+			("lib/magic/magic.py", "lib/magic/magic.pyc"),
+			("lib/magic/__init__.py", "lib/magic/__init__.pyc"),
+			("cros.py", "cros.pyc")
+		])
+
+Type = T_PYCROSSPLATFORM
+OutputDirectory = STANDARD_OUTDIR
+CleanTemporaryFiles = True
+OutDirDirs = ['lib', 'lib/magic/', 'lib/EagleM/']
+Optimize = 2
+Output = "cros.8a"
+ModulesRequired = ['python-spdylay==0.1.2', 'pyyaml==3.11', 'python-magic==0.4.10']
+
+def pre():
+		if sys.version_info <= (3,0):
+				print("[err] Python 3 or newer is required.")

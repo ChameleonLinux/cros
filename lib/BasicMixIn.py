@@ -1,3 +1,10 @@
+"""
+ * cros project                                              https://github.com/ProjectCros/cros
+ * (c) 2016 Py64 <py64.wolflinux@gmail.com>                  https://github.com/Py64
+ *
+ * This software is distributed on CPL license.
+ * https://github.com/ProjectCros/CPL
+"""
 import posixpath
 import socketserver
 import os
@@ -9,6 +16,7 @@ import cgi
 import spdylay
 from lib import IfNoneUseDefault as inud
 from xml.sax.saxutils import escape
+from lib.Reaper import *
 import socket
 
 class MixIn:
@@ -40,6 +48,7 @@ class MixIn:
             Out.log(self.ServerConfiguration.Logging[key], self.client_address[0] + " | " + msg + " | " + path, show, exit)
 
     def Banned(self):
+        deprecated(reason="Waiting for merge process.")
         if self.client_address in self.ServerConfiguration.Access['bannedIPs']:
             self.ReturnError(403)
             return True
@@ -47,13 +56,11 @@ class MixIn:
 
     def do_GET(self):
         """Serve a GET request."""
-        Out.log("__DEBUG__", "processing request")
         if self.Banned(): return None
         path = self.translate_path(self.path)
         f = self.Authorize(path)
         if self.checkAccess(path) == None or f == None or self.Authenticate() == False: return None
         proxy = self.Proxy()
-        Out.log("__DEBUG__", proxy)
         if proxy == None:
             self.send_response(200)
             HTTPHeaders.send(self, path)
@@ -64,6 +71,7 @@ class MixIn:
             self.Send(proxy)
 
     def checkAccess(self, path, honly=False):
+        deprecated(reason="Waiting for merge process.")
         accessnode = self.ServerConfiguration.Access
         if accessnode['Enable']:
             for bpath in accessnode['blockedPaths']:
@@ -78,7 +86,6 @@ class MixIn:
     def Send(self, data):
         enc = inud.get_d(self.headers, 'Accept-Encoding', '')
         dataa = data
-        Out.log("__DEBUG__", dataa)
         if self.ServerConfiguration.Gzip and 'gzip' in enc.lower(): dataa = Gzip.encode(data)
         self.wfile.write(dataa)
 
@@ -103,6 +110,7 @@ class MixIn:
         return path
 
     def Authorize(self, path, honly=False):
+        deprecated(reason="Waiting for merge process.")
         f = None
         if os.path.isfile(path):
             try:
@@ -180,6 +188,7 @@ class MixIn:
         HTTPHeaders.send(self, path, authh)
 
     def Authenticate(self):
+        deprecated(reason="Waiting for merge process.")
         for arr in self.ServerConfiguration.Access['Authentication']:
             if arr['path'] == self.path:
                 if 'IPs' in arr:

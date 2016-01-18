@@ -1,9 +1,8 @@
-magic
-magic1.dll
-regex2.dll
-zlib1.dll
-logs/*
+logs/*.log
 lib/__pycache__
+lib/magic/__pycache__
 *.cert
 *.key
 dev.RunFile
+*.log
+lib/EagleM
