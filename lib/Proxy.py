@@ -8,6 +8,8 @@
 import urllib.request
 from lib.magic import magic
 import gzip
+from lib import Out
+import requests
 
 def Get(url, ip, headers, cheaders):
     heads = {"X-Forwarded-For": ip[0]}
@@ -16,9 +18,9 @@ def Get(url, ip, headers, cheaders):
     for key, value in cheaders.items():
         if key.lower() != 'accept-encoding':
             heads.update({key: value})
-    req = urllib.request.Request(url, headers=heads)
-    res = urllib.request.urlopen(req)
-    response = res.read()
+    request = requests.get(url, headers=headers)
+    response = str(request.text)
+    response = response.encode("utf-8")
     mime = bytes.decode(magic.Magic(mime=True).from_buffer(response))
-    if "gzip" in mime: response = gzip.decompress(response)
-    return response
+    if "gzip" in mime or "octet-stream" in mime: response = gzip.decompress(response)
+    return (request, response)

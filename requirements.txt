@@ -8,3 +8,6 @@ python-spdylay==0.1.2
 
 # MIME types
 python-magic==0.4.10
+
+# Proxy
+requests==2.9.1

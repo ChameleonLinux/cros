@@ -18,6 +18,7 @@ from lib import IfNoneUseDefault as inud
 from xml.sax.saxutils import escape
 from lib.Reaper import *
 import socket
+from sdk import Hooks
 
 class MixIn:
     AlternativeErrorDocs = {'404': """<!DOCTYPE html>
@@ -47,41 +48,55 @@ class MixIn:
         if self.ServerConfiguration.Logging['Enable']:
             Out.log(self.ServerConfiguration.Logging[key], self.client_address[0] + " | " + msg + " | " + path, show, exit)
 
-    def Banned(self):
-        deprecated(reason="Waiting for merge process.")
+    def CheckEverything(self, path):
         if self.client_address in self.ServerConfiguration.Access['bannedIPs']:
             self.ReturnError(403)
-            return True
-        return False
-
-    def do_GET(self):
-        """Serve a GET request."""
-        if self.Banned(): return None
-        path = self.translate_path(self.path)
-        f = self.Authorize(path)
-        if self.checkAccess(path) == None or f == None or self.Authenticate() == False: return None
-        proxy = self.Proxy()
-        if proxy == None:
-            self.send_response(200)
-            HTTPHeaders.send(self, path)
-            self.Send(f.read())
-        else:
-            self.send_response(200)
-            HTTPHeaders.send(self, 'skip')
-            self.Send(proxy)
-
-    def checkAccess(self, path, honly=False):
-        deprecated(reason="Waiting for merge process.")
+            return False
         accessnode = self.ServerConfiguration.Access
         if accessnode['Enable']:
             for bpath in accessnode['blockedPaths']:
                 if path.startswith(bpath):
                     self.ReturnError(403, 'Access', honly)
-                    return None
+                    return False
             if os.path.splitext(path)[1] in accessnode['blockedExtensions']:
                 self.ReturnError(403, 'Access', honly)
-                return None
-        return True
+                return False
+        f = None
+        if os.path.isfile(path):
+            try:
+                f = open(path, 'rb')
+            except IOError:
+                self.ReturnError(403, 'Access', honly)
+                return False
+        else:
+            self.ReturnError(404, 'Access', honly)
+            return False
+        for arr in self.ServerConfiguration.Access['Authentication']:
+            if arr['path'] == self.path:
+                if 'IPs' in arr:
+                    if self.client_address[0] in arr['IPs']: return f
+                if 'Authorization' in self.headers:
+                    auth = self.headers['Authorization'][6:]
+                    if Passwd.Compare(auth, arr['passwd']): return f
+                self.do_AUTHHEAD(arr)
+                return False
+        return f
+
+    def do_GET(self):
+        """Serve a GET request."""
+        path = self.translate_path(self.path)
+        f = self.CheckEverything(path)
+        if f == False: return False
+        Hooks.run("GET_always")
+        proxy = self.Proxy()
+        if proxy == None:
+            Hooks.run("GET_noproxy")
+            self.send_response(200)
+            Hooks.run("GET_statuscode")
+            HTTPHeaders.send(self, path)
+            Hooks.run("GET_headers")
+            self.Send(f.read())
+            Hooks.run("GET_response")
 
     def Send(self, data):
         enc = inud.get_d(self.headers, 'Accept-Encoding', '')
@@ -109,21 +124,8 @@ class MixIn:
                 if os.path.isfile(os.path.join(path, indfile)): path = os.path.join(path, indfile)
         return path
 
-    def Authorize(self, path, honly=False):
-        deprecated(reason="Waiting for merge process.")
-        f = None
-        if os.path.isfile(path):
-            try:
-                f = open(path, 'rb')
-            except IOError:
-                self.ReturnError(403, 'Access', honly)
-                return None
-        else:
-            self.ReturnError(404, 'Access', honly)
-            return None
-        return f
 
-        # Override built-in logging
+    # Override built-in logging
     def log_request(self, code='-', size='-'):
         self.Log('Access', self.requestline)
 
@@ -131,17 +133,20 @@ class MixIn:
 
     # Same HTML from Apache error page
     error_message_format = '''\
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
-<html><head>
-<title>{code} {reason}</title>
-</head><body>
-<h1>{reason}</h1>
-<p>{explain}</p>
-<hr>
-<address>{server} at {hostname} Port {port}</address>
-</body></html>
-'''
-    def send_error(self, code, message=None):
+<!doctype html>
+<html>
+<head>
+  <title>{code} {reason}</title>
+</head>
+<body>
+  <h1>{code} {reason}</h1>
+  {explain}
+  <footer>
+    <hr/>
+    <small>{server}:{port} ({hostname}) on {osname}</small>
+  </footer>
+</body>'''
+    def send_error(self, code):
         # Make sure that code is really int
         code = int(code)
         try:
@@ -162,21 +167,19 @@ class MixIn:
 
         self.send_response(code, message)
         HTTPHeaders.send(self, 'skip', extra={'Content-Type': self.error_content_type})
-
         self.wfile.write(content)
 
     def ReturnError(self, code, etype, honly=False):
         self.Log(etype, "Returned " + str(code) + ".")
-        if code==404: msg="404 Not Found"
-        if code==403: msg="403 Forbidden"
-        if code==500: msg="500 Internal Server Error"
-        self.send_error(code, message=msg)
+        self.send_error(code)
 
     def Proxy(self):
         if self.ServerConfiguration.Proxy != None:
             headers = {"X-Forwarded-By": self.version_string(), "Accept-Encoding": "gzip"}
-            remoteresponse = Proxy.Get(self.ServerConfiguration.Proxy + self.path, self.client_address, headers, dict(self.headers))
-            return remoteresponse
+            r, t = Proxy.Get(self.ServerConfiguration.Proxy + self.path, self.client_address, headers, dict(self.headers))
+            self.send_response(r.status_code)
+            HTTPHeaders.send(self, 'skip', r.headers)
+            self.Send(t)
         return None
 
     def do_AUTHHEAD(self, arr):
@@ -186,18 +189,6 @@ class MixIn:
         if 'reason' in arr:
             authh = {"WWW-Authenticate": 'Basic realm=\"%r\"' % arr['reason']}
         HTTPHeaders.send(self, path, authh)
-
-    def Authenticate(self):
-        deprecated(reason="Waiting for merge process.")
-        for arr in self.ServerConfiguration.Access['Authentication']:
-            if arr['path'] == self.path:
-                if 'IPs' in arr:
-                    if self.client_address[0] in arr['IPs']: return True
-                if 'Authorization' in self.headers:
-                    auth = self.headers['Authorization'][6:]
-                    if Passwd.Compare(auth, arr['passwd']): return True
-                self.do_AUTHHEAD(arr)
-                return False
 
     def version_string(self):
         if self.ServerConfiguration.ServerHeader == True: return self.server_version

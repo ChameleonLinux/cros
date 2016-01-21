@@ -6,10 +6,12 @@
  * https://github.com/ProjectCros/CPL
 """
 import sys
+import time
 
 def log(logname, txt, console=False, exit=False):
     if logname == "__DEBUG__": logname = "debug.log"
     file = open(logname, "a")
+    file.write(time.strftime("%c") + " | ")
     file.write(txt)
     file.write("\n")
     file.close()

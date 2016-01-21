@@ -1,0 +1,6 @@
+from sdk import Hooks, Arguments
+import re
+def main(p, args):
+    print("Hello user!")
+if Arguments.get(re.compile("--hello-captain|--hello|--call-me-a-captain|--helloworld.extension"), True):
+    Hooks.trigger("startup", main)

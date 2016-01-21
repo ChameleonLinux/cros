@@ -10,7 +10,7 @@ from lib import IfNoneUseDefault as inud
 
 class Configuration:
     # Init predefined variables
-    MainLog = None
+    MainLog = Plugins = None
     Servers = []
 
     # Load
@@ -18,6 +18,7 @@ class Configuration:
         file = open(path)
         runfile = yaml.load(file.read())
         self.MainLog = inud.get_d(runfile, "MainLog", "/var/log/httpjs/main.log")
+        self.Plugins = inud.get_d(runfile, "Plugins", [])
 
         # Put servers configurations into array
         for key, value in runfile['Servers'].items(): self.Servers.append(Server(value))

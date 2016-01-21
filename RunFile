@@ -21,9 +21,9 @@ Servers:
     # Error Pages
     ##
     Errors:
-      e404: /usr/share/cros/404.html
-      e403: /usr/share/cros/403.html
-      e500: /usr/share/cros/500.html
+      e404: /usr/share/cros/template.html
+      e403: /usr/share/cros/template.html
+      e500: /usr/share/cros/template.html
 
     ##
     # SPDY

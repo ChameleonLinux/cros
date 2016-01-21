@@ -7,7 +7,9 @@
  * https://github.com/ProjectCros/CPL
 """
 
+from sdk import Hooks
 import sys
+import imp
 if sys.version_info <= (3,0):
     print("[err] cros has been written only for Python 3 and tested on Python 3.5.1.")
     sys.exit(4)
@@ -31,6 +33,13 @@ configpath = inud.get(Arguments.get(re.compile("--config|-c")), "RunFile", True)
 config = Configuration.Configuration(configpath)
 servers = config.Servers
 
+# Import plugins
+try:
+    for plg in config.Plugins:
+        imp.load_source(plg, "plugins/" + plg + ".cros-extension")
+except Exception as e:
+    print("[err] Plugin error: " + str(e))
+
 # Show message with version.
 crosinfo.Show(config)
 
@@ -39,6 +48,14 @@ try:
     if os.geteuid() == 0 and crosinfo.Insecure == False:
         Out.log(config.MainLog, " [err] cros cannot be executed by root for security reasons.", True, True)
 except AttributeError: None
+
+# Trigger start hook
+Hooks.run("startup", {'Configuration': config})
+
+# Register all hooks
+hooklist = ["GET_always", "GET_noproxy", "GET_statuscode", "GET_headers", "GET_response"]
+for hookname in hooklist:
+    Hooks.hook(hookname)
 
 # Start servers. Get ports & addresses. Listen to them.
 httpservers = []
@@ -60,5 +77,7 @@ try:
         httpservers.append(httpserver)
         Out.log(config.MainLog, " [inf] Serving " + server.Address + " on port " + str(server.Port) + ".", True)
         httpserver.start()
+        Hooks.run("servers-init", {'Configuration': config})
 except KeyboardInterrupt:
     print("Interrupted by keyboard.")
+    for srv in servers: srv.stop()
