@@ -56,20 +56,20 @@ class MixIn:
         if accessnode['Enable']:
             for bpath in accessnode['blockedPaths']:
                 if path.startswith(bpath):
-                    self.ReturnError(403, 'Access', honly)
+                    self.ReturnError(403, 'Access')
                     return False
             if os.path.splitext(path)[1] in accessnode['blockedExtensions']:
-                self.ReturnError(403, 'Access', honly)
+                self.ReturnError(403, 'Access')
                 return False
         f = None
         if os.path.isfile(path):
             try:
                 f = open(path, 'rb')
             except IOError:
-                self.ReturnError(403, 'Access', honly)
+                self.ReturnError(403, 'Access')
                 return False
         else:
-            self.ReturnError(404, 'Access', honly)
+            self.ReturnError(404, 'Access')
             return False
         for arr in self.ServerConfiguration.Access['Authentication']:
             if arr['path'] == self.path:
@@ -87,23 +87,26 @@ class MixIn:
         path = self.translate_path(self.path)
         f = self.CheckEverything(path)
         if f == False: return False
-        Hooks.run("GET_always")
+        Hooks.run("GET_always", [self])
         proxy = self.Proxy()
         if proxy == None:
-            Hooks.run("GET_noproxy")
+            Hooks.run("GET_noproxy", [self])
             self.send_response(200)
-            Hooks.run("GET_statuscode")
+            Hooks.run("GET_statuscode", [self])
             HTTPHeaders.send(self, path)
-            Hooks.run("GET_headers")
-            self.Send(f.read())
-            Hooks.run("GET_response")
+            Hooks.run("GET_headers", [self])
+            self.SendFile(path)
+            Hooks.run("GET_response", [self])
 
     def Send(self, data):
         enc = inud.get_d(self.headers, 'Accept-Encoding', '')
         dataa = data
         if self.ServerConfiguration.Gzip and 'gzip' in enc.lower(): dataa = Gzip.encode(data)
         self.wfile.write(dataa)
-
+    def SendFile(self, fname):
+        with open(fname, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                self.Send(chunk)
     def do_HEAD(self):
         path = self.translate_path(self.path)
         if self.Authorize(path, True) != None or self.checkAccess(path, True) != None: self.send_response(200)
@@ -169,7 +172,7 @@ class MixIn:
         HTTPHeaders.send(self, 'skip', extra={'Content-Type': self.error_content_type})
         self.wfile.write(content)
 
-    def ReturnError(self, code, etype, honly=False):
+    def ReturnError(self, code, etype=False):
         self.Log(etype, "Returned " + str(code) + ".")
         self.send_error(code)
 

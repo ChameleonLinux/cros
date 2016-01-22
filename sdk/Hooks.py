@@ -8,7 +8,7 @@
 global hooks
 try:
     hooks
-except Exception: hooks = {"startup": [], "servers-init": []}
+except Exception: hooks = {"startup": [], "servers-init": [], "log": []}
 
 def register_trigger(name, func, args=None):
     hooks[name].append([func, args])

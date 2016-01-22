@@ -7,10 +7,12 @@
 """
 import sys
 import time
+from sdk import Hooks
 
 def log(logname, txt, console=False, exit=False):
     if logname == "__DEBUG__": logname = "debug.log"
     file = open(logname, "a")
+    Hooks.run("log", [file, txt, logname, console, exit])
     file.write(time.strftime("%c") + " | ")
     file.write(txt)
     file.write("\n")
