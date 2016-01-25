@@ -1,0 +1,15 @@
+"""
+ * cros project                                              https://github.com/ProjectCros/cros
+ * (c) 2016 Py64 <py64.wolflinux@gmail.com>                  https://github.com/Py64
+ *
+ * This software is distributed on CPL license.
+ * https://github.com/ProjectCros/CPL
+"""
+from sdk import Hooks, IfNoneUseDefault
+import os, time
+def lmheader(p, a):
+    staticfiles = IfNoneUseDefault.get_d(p[0].ServerConfiguration.MeDict, "DynamicFiles", [])
+    if not os.path.splitext(p[1])[1] in staticfiles:
+        f = open(p[1], "rb")
+        p[0].send_header("Last-Modified", p[0].date_time_string(os.fstat(f.fileno()).st_mtime))
+Hooks.trigger("headers_pathknown", lmheader)

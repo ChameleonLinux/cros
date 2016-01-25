@@ -1,0 +1,27 @@
+"""
+ * cros project                                              https://github.com/ProjectCros/cros
+ * (c) 2016 Py64 <py64.wolflinux@gmail.com>                  https://github.com/Py64
+ *
+ * This software is distributed on CPL license.
+ * https://github.com/ProjectCros/CPL
+"""
+from sdk import Hooks, IfNoneUseDefault, Out, Headers
+def Parse(p, a):
+    self = p[0]
+    branches = IfNoneUseDefault.get_d(self.ServerConfiguration.MeDict, "UpdatesPlugin", [])
+    if self.path == "/get-branches":
+        self.send_response(200)
+        Headers.send(self, 'skip', {'Content-Type': 'text/plain', 'Response-Type': 'crosupdate/help', 'Provider': 'cros.update-server/1a'}, nogzip=True)
+        for branch in branches:
+            self.wfile.write(branch['name'].encode("utf-8"))
+    else:
+        for branch in branches:
+            if self.path == "/get-version/" + branch["name"]:
+                self.send_response(200)
+                Headers.send(self, 'skip', {'Content-Type': 'text/plain', 'Response-Type': 'crosupdate/version', 'Provider': 'cros.update-server/1a'}, nogzip=True)
+                self.wfile.write(branch["version"].encode("utf-8"))
+    raise Exception("Everything done.")
+    #if self.path == "/"
+Hooks.trigger("GET_always", Parse)
+
+Out.log("plgdebug.log", "plugin")

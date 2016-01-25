@@ -5,5 +5,5 @@
  * This software is distributed on CPL license.
  * https://github.com/ProjectCros/CPL
 """
-from lib import Hashing
-md5 = Hashing.md5
+from lib import Out
+log = Out.log

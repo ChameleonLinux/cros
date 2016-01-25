@@ -33,6 +33,12 @@ configpath = inud.get(Arguments.get(re.compile("--config|-c")), "RunFile", True)
 config = Configuration.Configuration(configpath)
 servers = config.Servers
 
+# Register all hooks
+hooklist = ["GET_always", "GET_noproxy", "GET_statuscode", "GET_headers", "GET_response",
+            "headers_pathknown", "headers"]
+for hookname in hooklist:
+    Hooks.hook(hookname)
+
 # Import plugins
 try:
     for plg in config.Plugins:
@@ -51,11 +57,6 @@ except AttributeError: None
 
 # Trigger start hook
 Hooks.run("startup", {'Configuration': config})
-
-# Register all hooks
-hooklist = ["GET_always", "GET_noproxy", "GET_statuscode", "GET_headers", "GET_response"]
-for hookname in hooklist:
-    Hooks.hook(hookname)
 
 # Start servers. Get ports & addresses. Listen to them.
 httpservers = []

@@ -5,5 +5,6 @@
  * This software is distributed on CPL license.
  * https://github.com/ProjectCros/CPL
 """
-from lib import Hashing
-md5 = Hashing.md5
+from lib import IfNoneUseDefault
+get = IfNoneUseDefault.get
+get_d = IfNoneUseDefault.get_d

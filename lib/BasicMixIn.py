@@ -19,6 +19,7 @@ from xml.sax.saxutils import escape
 from lib.Reaper import *
 import socket
 from sdk import Hooks
+import platform
 
 class MixIn:
     AlternativeErrorDocs = {'404': """<!DOCTYPE html>
@@ -61,16 +62,6 @@ class MixIn:
             if os.path.splitext(path)[1] in accessnode['blockedExtensions']:
                 self.ReturnError(403, 'Access')
                 return False
-        f = None
-        if os.path.isfile(path):
-            try:
-                f = open(path, 'rb')
-            except IOError:
-                self.ReturnError(403, 'Access')
-                return False
-        else:
-            self.ReturnError(404, 'Access')
-            return False
         for arr in self.ServerConfiguration.Access['Authentication']:
             if arr['path'] == self.path:
                 if 'IPs' in arr:
@@ -80,23 +71,42 @@ class MixIn:
                     if Passwd.Compare(auth, arr['passwd']): return f
                 self.do_AUTHHEAD(arr)
                 return False
-        return f
+
+    def accessible(self, path):
+        if os.path.isfile(path):
+            try:
+                open(path, 'rb')
+            except IOError:
+                self.ReturnError(403, 'Access')
+                return False
+        else:
+            self.ReturnError(404, 'Access')
+            return False
 
     def do_GET(self):
         """Serve a GET request."""
         path = self.translate_path(self.path)
-        f = self.CheckEverything(path)
-        if f == False: return False
-        Hooks.run("GET_always", [self])
+        if self.CheckEverything(path) == False: return False
+        try:
+            Hooks.run("GET_always", [self])
+        except Exception: return True
         proxy = self.Proxy()
-        if proxy == None:
-            Hooks.run("GET_noproxy", [self])
+        if proxy == None and self.accessible(path) != False:
+            try:
+                Hooks.run("GET_noproxy", [self])
+            except Exception: return True
             self.send_response(200)
-            Hooks.run("GET_statuscode", [self])
+            try:
+                Hooks.run("GET_statuscode", [self])
+            except Exception: return True
             HTTPHeaders.send(self, path)
-            Hooks.run("GET_headers", [self])
+            try:
+                Hooks.run("GET_headers", [self])
+            except Exception: return True
             self.SendFile(path)
-            Hooks.run("GET_response", [self])
+            try:
+                Hooks.run("GET_response", [self])
+            except Exception: return True
 
     def Send(self, data):
         enc = inud.get_d(self.headers, 'Accept-Encoding', '')
@@ -149,7 +159,7 @@ class MixIn:
     <small>{server}:{port} ({hostname}) on {osname}</small>
   </footer>
 </body>'''
-    def send_error(self, code):
+    def send_error(self, code, message=None):
         # Make sure that code is really int
         code = int(code)
         try:
@@ -166,7 +176,8 @@ class MixIn:
             explain=escape(explain),
             server=escape(self.server_version),
             hostname=escape(socket.getfqdn()),
-            port=self.server.server_address[1]).encode('UTF-8')
+            port=self.server.server_address[1],
+            osname=platform.system() + " " + platform.release()).encode('UTF-8')
 
         self.send_response(code, message)
         HTTPHeaders.send(self, 'skip', extra={'Content-Type': self.error_content_type})

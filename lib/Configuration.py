@@ -25,7 +25,7 @@ class Configuration:
 
 class Server:
     # Init predefined variables
-    Address = Port = Directory = Listing = IndexFiles = Errors = SPDY = SSL = Logging = Gzip = Access = Headers = CGI = ServerHeader = Proxy = None
+    Address = Port = Directory = Listing = IndexFiles = Errors = SPDY = SSL = Logging = Gzip = Access = Headers = CGI = ServerHeader = Proxy = MeDict = None
 
     # Load
     def load(self, srvyaml):
@@ -82,6 +82,7 @@ class Server:
         self.ServerHeader = inud.get_d(srvyaml, 'Server-Header', False)
 
     def __init__(self, srvyaml):
+        self.MeDict = srvyaml
         dict_ = srvyaml
         for f in inud.get_d(srvyaml, 'Includes', []):
             dict_.update(yaml.load(open(f,"r").read()))
