@@ -17,7 +17,10 @@ class ServerStart:
         self.server_thread.daemon = daemon
         self.server_thread.start()
     def stop(self):
-        if type(self.server_thread) != None: self.server_thread.stop()
+        self.server_close()
+        if type(self.server_thread) != None:
+            self.server_thread._target.__shutdown_request = True
+            self.server_thread.stop()
 
 class ThreadedTCPServer(ServerStart, socketserver.ThreadingMixIn, socketserver.TCPServer):
 

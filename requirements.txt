@@ -11,3 +11,6 @@ python-magic==0.4.10
 
 # Proxy
 requests==2.9.1
+
+# Taiga
+Markdown==2.6.5

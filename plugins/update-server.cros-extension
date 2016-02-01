@@ -22,6 +22,6 @@ def Parse(p, a):
                 self.wfile.write(branch["version"].encode("utf-8"))
     raise Exception("Everything done.")
     #if self.path == "/"
-Hooks.trigger("GET_always", Parse)
+Hooks.trigger("REQUEST", Parse)
 
 Out.log("plgdebug.log", "plugin")

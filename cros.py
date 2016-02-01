@@ -34,17 +34,17 @@ config = Configuration.Configuration(configpath)
 servers = config.Servers
 
 # Register all hooks
-hooklist = ["GET_always", "GET_noproxy", "GET_statuscode", "GET_headers", "GET_response",
-            "headers_pathknown", "headers"]
+hooklist = ["REQUEST", "REQUEST_statuscode", "REQUEST_headers", "REQUEST_response",
+            "headers_pathknown", "headers", "REQUEST_exists"]
 for hookname in hooklist:
     Hooks.hook(hookname)
 
 # Import plugins
-try:
-    for plg in config.Plugins:
-        imp.load_source(plg, "plugins/" + plg + ".cros-extension")
-except Exception as e:
-    print("[err] Plugin error: " + str(e))
+#try:
+for plg in config.Plugins:
+    imp.load_source(plg, "plugins/" + plg + ".cros-extension")
+#except Exception as e:
+#    print("[err] Plugin error: " + str(e))
 
 # Show message with version.
 crosinfo.Show(config)

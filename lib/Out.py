@@ -14,7 +14,7 @@ def log(logname, txt, console=False, exit=False):
     file = open(logname, "a")
     Hooks.run("log", [file, txt, logname, console, exit])
     file.write(time.strftime("%c") + " | ")
-    file.write(txt)
+    file.write(str(txt))
     file.write("\n")
     file.close()
     if console: print(txt)

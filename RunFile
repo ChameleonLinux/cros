@@ -60,14 +60,6 @@ Servers:
       Unknown: /var/log/cros/unknown.log
 
     ##
-    # CGI
-    ##
-    CGI:
-      Enable: True
-      Directories:
-        - /cgi-bin
-
-    ##
     # GZip
     ##
     Gzip: True
@@ -86,8 +78,6 @@ Servers:
       Authentication:
         - path: undefined
 
-    Proxy: https://google.com
-
     ##
     # Rewrite & redirect
     ##
@@ -98,6 +88,39 @@ Servers:
       - type: rewrite
         pattern: ^/test/(.*)$
         destination: /index.html?p=$1
+
+    ##
+    # Access
+    ##
+    Access:
+      Enable: False
+      blockedExtensions:
+        - .blockedext
+      blockedPaths:
+        - undefined
+      bannedIPs:
+        - 0.0.0.0
+      Authentication:
+        - path: undefined
+
+    ##
+    # CGI
+    ##
+    CGI:
+      Enable: True
+      Directories:
+        - path: /cgi-bin
+          extensions:
+            - ext: .py3
+              launch-binary: /usr/bin/python3
+              launch-args: ^filename
+            - ext: .compiled
+              launch-binary: ./^filename
+        - path: /
+          extensions:
+            - ext: .php
+              launch-binary: /usr/bin/php-cgi
+              launch-args: ^filename
 
     ##
     # Additional Headers

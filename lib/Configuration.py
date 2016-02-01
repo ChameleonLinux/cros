@@ -17,7 +17,7 @@ class Configuration:
     def __init__(self, path):
         file = open(path)
         runfile = yaml.load(file.read())
-        self.MainLog = inud.get_d(runfile, "MainLog", "/var/log/httpjs/main.log")
+        self.MainLog = inud.get_d(runfile, "MainLog", "/var/log/cros/main.log")
         self.Plugins = inud.get_d(runfile, "Plugins", [])
 
         # Put servers configurations into array
@@ -25,7 +25,7 @@ class Configuration:
 
 class Server:
     # Init predefined variables
-    Address = Port = Directory = Listing = IndexFiles = Errors = SPDY = SSL = Logging = Gzip = Access = Headers = CGI = ServerHeader = Proxy = MeDict = None
+    Address = Port = Directory = Listing = IndexFiles = Errors = SPDY = SSL = Logging = Gzip = Access = Headers = ServerHeader = Proxy = MeDict = None
 
     # Load
     def load(self, srvyaml):
@@ -36,9 +36,9 @@ class Server:
         self.IndexFiles = inud.get_d(srvyaml, 'IndexFiles', ["index.html"])
         self.Proxy = inud.get_d(srvyaml, 'Proxy', None)
         self.Errors = inud.get_d(srvyaml, "Errors", {
-            'e404': '/usr/share/httpjs/errors/404.html',
-            'e403': '/usr/share/httpjs/errors/403.html',
-            'e500': '/usr/share/httpjs/errors/500.html'
+            'e404': '/usr/share/cros/errors/404.html',
+            'e403': '/usr/share/cros/errors/403.html',
+            'e500': '/usr/share/cros/errors/500.html'
         })
         self.SPDY = inud.get_d(srvyaml, 'SPDY', {
             'Enable': None,
@@ -60,15 +60,11 @@ class Server:
             else: self.SPDY['Enable'] = False
         self.Logging = inud.get_d(srvyaml, 'Logging', {
             'Enable': True,
-            'Access': '/var/log/httpjs/access.log',
-            'Error': '/var/log/httpjs/error.log',
-            'Info': '/var/log/httpjs/info.log',
-            'Warn': '/var/log/httpjs/warn.log',
-            'Unknown': '/var/log/httpjs/unknown.log'
-        })
-        self.CGI = inud.get_d(srvyaml, 'CGI', {
-            'Enable': False,
-            'Directories': ['/cgi-bin']
+            'Access': '/var/log/cros/access.log',
+            'Error': '/var/log/cros/error.log',
+            'Info': '/var/log/cros/info.log',
+            'Warn': '/var/log/cros/warn.log',
+            'Unknown': '/var/log/cros/unknown.log'
         })
         self.Gzip = inud.get_d(srvyaml, 'Gzip', True)
         self.Access = inud.get_d(srvyaml, 'Access', {

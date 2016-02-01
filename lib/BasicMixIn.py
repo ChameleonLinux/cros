@@ -10,7 +10,7 @@ import socketserver
 import os
 import urllib
 from urllib.parse import unquote
-from lib import HTTPHeaders, Out, Gzip, Passwd, crosinfo, Proxy
+from lib import HTTPHeaders, Out, Gzip, Passwd, crosinfo
 import base64
 import cgi
 import spdylay
@@ -22,24 +22,6 @@ from sdk import Hooks
 import platform
 
 class MixIn:
-    AlternativeErrorDocs = {'404': """<!DOCTYPE html>
-    <head>
-    <meta charset="utf-8">
-    <title>404 Not Found</title>
-    </head>
-    <body>
-    <h1>404 Not Found</h1>
-    </body>
-    </html>""",
-    '403': """<!DOCTYPE html>
-    <head>
-    <meta charset="utf-8">
-    <title>403 Forbidden</title>
-    </head>
-    <body>
-    <h1>403 Forbidden</h1>
-    </body>
-    </html>"""}
 
     server_version = "cros/" + crosinfo.Version
 
@@ -88,31 +70,44 @@ class MixIn:
         path = self.translate_path(self.path)
         if self.CheckEverything(path) == False: return False
         try:
-            Hooks.run("GET_always", [self])
+            Hooks.run("REQUEST", [self])
         except Exception: return True
-        proxy = self.Proxy()
-        if proxy == None and self.accessible(path) != False:
+        if self.accessible(path) != False:
             try:
-                Hooks.run("GET_noproxy", [self])
+                Hooks.run("REQUEST_exists", [self])
             except Exception: return True
             self.send_response(200)
             try:
-                Hooks.run("GET_statuscode", [self])
+                Hooks.run("REQUEST_statuscode", [self])
             except Exception: return True
             HTTPHeaders.send(self, path)
             try:
-                Hooks.run("GET_headers", [self])
+                Hooks.run("REQUEST_headers", [self])
             except Exception: return True
             self.SendFile(path)
             try:
-                Hooks.run("GET_response", [self])
+                Hooks.run("REQUEST_response", [self])
             except Exception: return True
+
+    def do_POST(self):
+        path = self.translate_path(self.path)
+        if self.CheckEverything(path) == False: return False
+        try:
+            Hooks.run("REQUEST_always", [self])
+        except Exception: return True
+        if self.accessible(path) != False:
+            try:
+                Hooks.run("REQUEST_exists", [self])
+            except Exception: return True
+
+    do_PUT = do_POST
 
     def Send(self, data):
         enc = inud.get_d(self.headers, 'Accept-Encoding', '')
         dataa = data
         if self.ServerConfiguration.Gzip and 'gzip' in enc.lower(): dataa = Gzip.encode(data)
         self.wfile.write(dataa)
+        self.wfile.flush()
     def SendFile(self, fname):
         with open(fname, "rb") as f:
             for chunk in iter(lambda: f.read(4096), b""):
@@ -128,7 +123,6 @@ class MixIn:
         path = path.split('#',1)[0]
         path = os.path.normpath(urllib.parse.unquote(path))
         path = self.ServerConfiguration.Directory + path
-        f = None
         if os.path.isdir(path):
             if not self.path.endswith('/'):
                 path = os.path.join(path, "/")
@@ -143,8 +137,6 @@ class MixIn:
         self.Log('Access', self.requestline)
 
     error_content_type = 'text/html; charset=UTF-8'
-
-    # Same HTML from Apache error page
     error_message_format = '''\
 <!doctype html>
 <html>
@@ -156,7 +148,7 @@ class MixIn:
   {explain}
   <footer>
     <hr/>
-    <small>{server}:{port} ({hostname}) on {osname}</small>
+    <small>{server} ({hostname}:{port}) on {osname}</small>
   </footer>
 </body>'''
     def send_error(self, code, message=None):
@@ -179,22 +171,11 @@ class MixIn:
             port=self.server.server_address[1],
             osname=platform.system() + " " + platform.release()).encode('UTF-8')
 
-        self.send_response(code, message)
+        self.send_response(code)
         HTTPHeaders.send(self, 'skip', extra={'Content-Type': self.error_content_type})
-        self.wfile.write(content)
+        self.Send(content)
 
-    def ReturnError(self, code, etype=False):
-        self.Log(etype, "Returned " + str(code) + ".")
-        self.send_error(code)
-
-    def Proxy(self):
-        if self.ServerConfiguration.Proxy != None:
-            headers = {"X-Forwarded-By": self.version_string(), "Accept-Encoding": "gzip"}
-            r, t = Proxy.Get(self.ServerConfiguration.Proxy + self.path, self.client_address, headers, dict(self.headers))
-            self.send_response(r.status_code)
-            HTTPHeaders.send(self, 'skip', r.headers)
-            self.Send(t)
-        return None
+    ReturnError = send_error
 
     def do_AUTHHEAD(self, arr):
         path = self.translate_path(self.path)

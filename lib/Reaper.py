@@ -12,9 +12,10 @@ class private():
     def print(msg):
         print(msg, end="")
 
-def deprecated(alternative=None, reason=None):
-    calledby = inspect.getouterframes(inspect.currentframe(), 2)[1][3]
-    private.print("Function " + calledby + " is deprecated and should not be used.")
+def deprecated(alternative=None, reason=None, what=None):
+    if what == None:
+        what = inspect.getouterframes(inspect.currentframe(), 2)[1][3]
+    private.print("Function " + what + " is deprecated and should not be used.")
     if alternative != None: private.print(" However, " + alternative + " is available.")
     if reason != None: private.print("\nReason: " + reason)
     print()

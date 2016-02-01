@@ -9,10 +9,8 @@
   FILE.
 """
 
-VersionNo = "11"
+VersionNo = "12"
 Revision = "a"
-Insecure = True
+Insecure = False
 Final = False
 FinalVersion = "1.0"
-# build date may be different than commit date
-BuildDate = "n/a"

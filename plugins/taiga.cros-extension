@@ -1,0 +1,83 @@
+"""
+ * cros project                                              https://github.com/ProjectCros/cros
+ * (c) 2016 Py64 <py64.wolflinux@gmail.com>                  https://github.com/Py64
+ *
+ * This software is distributed on CPL license.
+ * https://github.com/ProjectCros/CPL
+"""
+from sdk import Hooks, Headers, Out
+from plugins.taiga import config
+import os, re, urllib, markdown
+def normpath(path):
+    path = path.split('?',1)[0]
+    path = path.split('#',1)[0]
+    path = os.path.normpath(urllib.parse.unquote(path))
+    return path
+
+def run(p, a):
+    docroot = p[0].ServerConfiguration.Directory
+    if os.path.isfile(docroot + "/_config.t"):
+        conf = config.Config(docroot).options
+        if conf['disallow_sysfiles'] == False:
+            if p[0].path.startswith("/_"):
+                p[0].ReturnError(403)
+                raise Exception("Access denied.")
+        layout = open(docroot + "/_layout.t", "r").read()
+        path = normpath(p[0].path)
+        if os.path.isfile(p[0].translate_path(p[0].path)):
+            if p[0].accessible(p[0].translate_path(p[0].path)) != False:
+                p[0].send_response(200)
+                Headers.send(p[0], p[0].translate_path(p[0].path))
+                p[0].Send(open(p[0].translate_path(p[0].path), "rb").read())
+                raise Exception("Done. File served.")
+            else:
+                p[0].ReturnError(404)
+                raise Exception("404")
+        if re.compile("^\/(.*)\/(.*)").match(path):
+            path = path.split("/")
+            date = path[1]
+            title = path[2]
+            path = docroot + "/_posts/" + date + "-" + title + ".md"
+            if p[0].accessible(path) == False:
+                p[0].ReturnError(404)
+                raise Exception("404")
+            content = open(path, "r")
+            md = markdown.Markdown(extensions = ['markdown.extensions.meta'])
+            html = md.convert(content.read())
+            doc = layout.format(
+                                content=html,
+                                title=md.Meta['title'][0],
+                                datetime=md.Meta['datetime'][0],
+                                s_title=conf['title'],
+                                description=conf['description'],
+                                baseurl=conf['baseurl'],
+                                basepath=conf['basepath'],
+                                footer=conf['footer_text'],
+                                footer_year=conf['footer_year']
+                               )
+            p[0].send_response(200)
+            Headers.send(p[0], 'skip', {'Last-Modified': p[0].date_time_string(os.fstat(content.fileno()).st_mtime), 'Content-type': 'text/html'})
+            p[0].Send(doc.encode('utf-8'))
+        elif re.compile("^\/$|^\/index$|^\/index.t$").match(p[0].path):
+            content = ""
+            for file in os.listdir(p[0].translate_path(p[0].path + "/_posts/")):
+                if file.endswith(".md"):
+                    year, month, day, title = file[:-3].split('-')
+                    content = content + "<li><a href=\"" + conf['baseurl'] + conf['basepath'] + year + "-" + month + "-" + day + "/" + title + "\">" + title + "</a></li>"
+            p[0].send_response(200)
+            Headers.send(p[0], 'skip', {"Content-type": "text/html"})
+            content = layout.format(
+                                content=content,
+                                title="List of pages",
+                                datetime="",
+                                s_title=conf['title'],
+                                description=conf['description'],
+                                baseurl=conf['baseurl'],
+                                basepath=conf['basepath'],
+                                footer=conf['footer_text'],
+                                footer_year=conf['footer_year']
+                               )
+            p[0].Send(content.encode('utf-8'))
+        raise Exception("Done.")
+
+Hooks.trigger("REQUEST", run)

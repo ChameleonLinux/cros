@@ -5,10 +5,7 @@
  * This software is distributed on CPL license.
  * https://github.com/ProjectCros/CPL
 """
-import hashlib
-def md5(fname):
-    hash = hashlib.md5()
-    with open(fname, "rb") as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            hash.update(chunk)
-    return hash.hexdigest()
+from sdk import IfNoneUseDefault
+import os, time
+def Get(p, name, default):
+    return IfNoneUseDefault.get_d(p[0].ServerConfiguration.MeDict, name, default)

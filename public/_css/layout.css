@@ -1,0 +1,105 @@
+html, body {
+  max-width: 600px;
+  margin: 0 auto;
+  font: 13px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+header {
+  margin-top: 40px;
+  padding-bottom: 2em;
+  overflow: hidden;
+  border-bottom: 1px solid #e8e8e8;
+  margin-bottom: 2em;
+}
+
+header > a {
+  font-size: 32px;
+  display: block;
+  float: left;
+  font-weight: bold;
+  max-width: 45%;
+  color: #333 !important;
+}
+
+a:visited, a:link, a {
+  color: #39c;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #036;
+}
+
+header > span {
+  float: right;
+  font-size:32px;
+  color: #727272;
+  max-width: 45%;
+}
+
+article > .text h1 {
+  font-size: 22px;
+  border-bottom: 1px solid #e8e8e8;
+}
+article h2 {
+  font-size: 20px;
+}
+article h3 {
+  font-size: 18px;
+}
+
+article > .meta time {
+  font-size:13px;
+  margin-left: 10px;
+  color: #727272;
+}
+
+article > .meta {
+  border-bottom: 1px solid #e8e8e8;
+  margin-bottom: 1.5em;
+  padding-bottom: 1.5em;
+  padding-left: 0.4em;
+}
+
+article > .text {
+  font-size: 105%;
+  padding-left: 0.6em;
+}
+
+article > .meta h1 {
+  font-size: 26px;
+}
+
+footer {
+  border-top: 1px solid #e8e8e8;
+  margin: 2em 0;
+  padding: 2em 0;
+}
+
+footer > h1 {
+  float:right;
+}
+
+blockquote {
+  margin: 1.5em 10px;
+  padding: 0.5em 10px;
+  quotes: "\201C""\201D""\2018""\2019";
+  color:#727272;
+}
+blockquote:before {
+  color: #ccc;
+  content: open-quote;
+  font-size: 4em;
+  line-height: 0.1em;
+  margin-right: 0.25em;
+  vertical-align: -0.4em;
+}
+blockquote p {
+  display: inline;
+}
+
+code {
+  border: 1px solid #e8e8e8;
+  display:block;
+  padding:5px 6px;
+}

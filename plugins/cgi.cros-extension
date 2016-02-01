@@ -1,0 +1,31 @@
+"""
+ * cros project                                              https://github.com/ProjectCros/cros
+ * (c) 2016 Py64 <py64.wolflinux@gmail.com>                  https://github.com/Py64
+ *
+ * This software is distributed on CPL license.
+ * https://github.com/ProjectCros/CPL
+"""
+from sdk import Hooks, Configuration, Out, IfNoneUseDefault, Headers
+from lib import scripting
+from urllib.parse import urlparse
+
+def cgirun(p, a):
+    cgiconf = Configuration.Get(p, "CGI", {"Enable": False, "Directories": []})
+    if cgiconf['Enable'] == False: raise Exception("Done")
+    for directory in cgiconf['Directories']:
+        for ext in directory['extensions']:
+            if not p[0].path.startswith(ext['path']):
+                raise Exception("Bad path!")
+            if os.path.splitext(p[0].path.split("?", 1)[0])[1] == ext['ext']:
+                cgiresponse = scripting.run(relativepath=p[0].path, path=p[0].translate_path(p[0].path), documentroot=p[0].ServerConfiguration.Directory,
+                                servername=p[0].ServerConfiguration.Address, serversoftware=p[0].server_version, https="off", remoteaddr=p[0].client_address[0],
+                                requestheaders=p[0].headers, serverprotocol=p[0].protocol_version, requestmethod=p[0].command, lb=IfNoneUseDefault.get_d(ext, 'launch-binary', ""),
+                                lc=IfNoneUseDefault.get_d(ext, 'launch-args', ""), contentlength=int(IfNoneUseDefault.get_d(p[0].headers, 'Content-Length', 0)), qs=urlparse(p[0].path).query,
+                                post=p[0].rfile
+                            )
+                p[0].send_response(cgiresponse.status)
+                Headers.send(p[0], 'skip', extra=cgiresponse.headers)
+                p[0].Send(cgiresponse.content)
+                cgiresponse = None
+                raise Exception("Done")
+Hooks.trigger("REQUEST_exists", cgirun)
